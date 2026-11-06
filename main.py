@@ -1,4 +1,3 @@
-
 import discord
 from discord.ext import commands
 from dotenv import load_dotenv
@@ -21,7 +20,7 @@ bot = commands.Bot(
 )
 
 # Importar motor de dados
-from dice import roll_pool, format_result
+from dice import roll_pool, SYMBOLS
 
 
 # ==========================================
@@ -44,26 +43,113 @@ async def on_ready():
 async def roll(ctx, *, pool: str = None):
 
     if not pool:
-        await ctx.send(
-            "🎲 **¡Necesitas indicar los dados!**\n\n"
-            "Ejemplo:\n"
-            "`!roll yyggkkrr`\n\n"
-            "**Dados disponibles:**\n"
-            "🔵 `b` — Impulso\n"
-            "🟢 `g` — Habilidad\n"
-            "🟡 `y` — Pericia\n"
-            "⚫ `k` — Contratiempo\n"
-            "🟣 `p` — Dificultad\n"
-            "🔴 `r` — Desafío"
+        # Embed de ayuda cuando no se especifican dados
+        embed_help = discord.Embed(
+            title="🎲 Ayuda de Tiradas - Genesys RPG",
+            description="¡Necesitas indicar qué dados quieres lanzar!\n\n**Ejemplo:**\n`!roll yyggkkrr`",
+            color=discord.Color.blue()
         )
+        embed_help.add_field(
+            name="Dados Disponibles",
+            value=(
+                "🔵 `b` — Bonus\n"
+                "🟢 `g` — Habilidad\n"
+                "🟡 `y` — Competencia\n"
+                "⚫ `k` — Desventaja\n"
+                "🟣 `p` — Dificultad\n"
+                "🔴 `r` — Desafío"
+            ),
+            inline=False
+        )
+        await ctx.send(embed=embed_help)
         return
 
     try:
         result = roll_pool(pool)
 
-        message = format_result(result)
+        # Construcción del Embed de resultados
+        net_success = result["net_success"]
+        net_advantage = result["net_advantage"]
+        totals = result["totals"]
 
-        await ctx.send(message)
+        # Determinar color del Embed según el resultado neto de éxitos
+        if net_success > 0:
+            embed_color = discord.Color.green()
+        elif net_success < 0:
+            embed_color = discord.Color.red()
+        else:
+            embed_color = discord.Color.gold()
+
+        embed = discord.Embed(
+            title="⚔️ Resultado de la Tirada",
+            color=embed_color
+        )
+
+        # 1. Agrupar tiradas individuales por tipo de dado
+        grouped = {}
+        for die in result["dice"]:
+            name = die["name"]
+            if name not in grouped:
+                grouped[name] = {
+                    "color": die["color"],
+                    "results": []
+                }
+            
+            if die["blank"]:
+                symbols_str = "— (Vacío)"
+            else:
+                symbols_str = " ".join(die["symbols"])
+            
+            grouped[name]["results"].append(symbols_str)
+
+        # Añadir detalle de dados lanzados
+        for name, data in grouped.items():
+            rolls_text = "\n".join([f"• {res}" for res in data["results"]])
+            embed.add_field(
+                name=f"{data['color']} {name} (×{len(data['results'])})",
+                value=rolls_text,
+                inline=False
+            )
+
+        # 2. Resumen neto
+        net_lines = []
+        if net_success > 0:
+            net_lines.append(f"{SYMBOLS['success']} Éxitos netos: **{net_success}**")
+        elif net_success < 0:
+            net_lines.append(f"{SYMBOLS['failure']} Fallos netos: **{abs(net_success)}**")
+        else:
+            net_lines.append("⚖️ Éxitos y fallos totalmente cancelados")
+
+        if net_advantage > 0:
+            net_lines.append(f"{SYMBOLS['advantage']} Ventajas netas: **{net_advantage}**")
+        elif net_advantage < 0:
+            net_lines.append(f"{SYMBOLS['threat']} Amenazas netas: **{abs(net_advantage)}**")
+        else:
+            net_lines.append("⚖️ Ventajas y amenazas totalmente canceladas")
+
+        embed.add_field(
+            name="📊 Resultado:",
+            value="\n".join(net_lines),
+            inline=False
+        )
+
+        # 3. Símbolos especiales (Triunfos / Desesperaciones) si los hay
+        special_lines = []
+        if totals["triumph"] > 0:
+            special_lines.append(f"{SYMBOLS['triumph']} **TRIUNFOS: {totals['triumph']}**")
+        if totals["despair"] > 0:
+            special_lines.append(f"{SYMBOLS['despair']} **DESESPERACIONES: {totals['despair']}**")
+
+        if special_lines:
+            embed.add_field(
+                name="✨ Efectos Especiales:",
+                value="\n".join(special_lines),
+                inline=False
+            )
+
+        embed.set_footer(text=f"Solicitado por {ctx.author.display_name}", icon_url=ctx.author.avatar.url if ctx.author.avatar else None)
+
+        await ctx.send(embed=embed)
 
     except ValueError as error:
         await ctx.send(f"❌ **Error en la tirada:** {error}")

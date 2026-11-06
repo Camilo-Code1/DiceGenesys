@@ -1,125 +1,117 @@
-
 import random
 
 # ==================================================
 # CONFIGURACIÓN DE LOS DADOS GENESYS
 # ==================================================
 #
-# Cada cara se representa mediante:
+# Cada cara se representa mediante la tupla:
 # (éxitos, fallos, ventajas, amenazas, triunfos, desesperaciones)
-#
 # ==================================================
 
 DICE = {
     "b": {
-        "name": "Impulso",
+        "name": "Bonus",
         "color": "🔵",
         "faces": [
-            (0, 0, 0, 0, 0, 0),
-            (0, 0, 0, 0, 0, 0),
-            (1, 0, 0, 0, 0, 0),
-            (1, 0, 1, 0, 0, 0),
-            (0, 0, 2, 0, 0, 0),
-            (0, 0, 1, 0, 0, 0),
+            (0, 0, 0, 0, 0, 0),  # Vacía (33.33%)
+            (0, 0, 0, 0, 0, 0),  # Vacía (33.33%)
+            (1, 0, 0, 0, 0, 0),  # Éxito (16.67%)
+            (0, 0, 1, 0, 0, 0),  # Ventaja (16.67%)
+            (0, 0, 2, 0, 0, 0),  # Doble Ventaja (16.67%)
+            (1, 0, 1, 0, 0, 0),  # Éxito + Ventaja (16.67%)
         ],
     },
-
     "g": {
         "name": "Habilidad",
         "color": "🟢",
         "faces": [
-            (0, 0, 0, 0, 0, 0),
-            (1, 0, 0, 0, 0, 0),
-            (1, 0, 0, 0, 0, 0),
-            (2, 0, 0, 0, 0, 0),
-            (0, 0, 1, 0, 0, 0),
-            (0, 0, 1, 0, 0, 0),
-            (1, 0, 1, 0, 0, 0),
-            (0, 0, 2, 0, 0, 0),
+            (0, 0, 0, 0, 0, 0),  # Vacía (12.5%)
+            (1, 0, 0, 0, 0, 0),  # Éxito (25%)
+            (1, 0, 0, 0, 0, 0),  # Éxito (25%)
+            (2, 0, 0, 0, 0, 0),  # Doble Éxito (12.5%)
+            (0, 0, 1, 0, 0, 0),  # Ventaja (25%)
+            (0, 0, 1, 0, 0, 0),  # Ventaja (25%)
+            (1, 0, 1, 0, 0, 0),  # Éxito + Ventaja (12.5%)
+            (0, 0, 2, 0, 0, 0),  # Doble Ventaja (12.5%)
         ],
     },
-
     "y": {
-        "name": "Pericia",
+        "name": "Competencia",
         "color": "🟡",
         "faces": [
-            (0, 0, 0, 0, 0, 0),
-            (1, 0, 0, 0, 0, 0),
-            (1, 0, 0, 0, 0, 0),
-            (2, 0, 0, 0, 0, 0),
-            (2, 0, 0, 0, 0, 0),
-            (0, 0, 1, 0, 0, 0),
-            (1, 0, 1, 0, 0, 0),
-            (1, 0, 1, 0, 0, 0),
-            (1, 0, 1, 0, 0, 0),
-            (0, 0, 2, 0, 0, 0),
-            (0, 0, 2, 0, 0, 0),
-            (1, 0, 0, 0, 1, 0),
+            (0, 0, 0, 0, 0, 0),  # Vacía (8.33%)
+            (1, 0, 0, 0, 0, 0),  # Éxito (16.67%)
+            (1, 0, 0, 0, 0, 0),  # Éxito (16.67%)
+            (2, 0, 0, 0, 0, 0),  # Doble Éxito (25%)
+            (2, 0, 0, 0, 0, 0),  # Doble Éxito (25%)
+            (2, 0, 0, 0, 0, 0),  # Doble Éxito (25%)
+            (0, 0, 1, 0, 0, 0),  # Ventaja (8.33%)
+            (1, 0, 1, 0, 0, 0),  # Éxito + Ventaja (25%)
+            (1, 0, 1, 0, 0, 0),  # Éxito + Ventaja (25%)
+            (1, 0, 1, 0, 0, 0),  # Éxito + Ventaja (25%)
+            (0, 0, 2, 0, 0, 0),  # Doble Ventaja (16.67%)
+            (0, 0, 2, 0, 0, 0),  # Doble Ventaja (16.67%)
+            (1, 0, 0, 0, 1, 0),  # Triunfo (8.33%)
         ],
     },
-
     "k": {
-        "name": "Contratiempo",
+        "name": "Desventaja",
         "color": "⚫",
         "faces": [
-            (0, 0, 0, 0, 0, 0),
-            (0, 0, 0, 0, 0, 0),
-            (0, 1, 0, 0, 0, 0),
-            (0, 1, 0, 0, 0, 0),
-            (0, 0, 0, 1, 0, 0),
-            (0, 0, 0, 1, 0, 0),
+            (0, 0, 0, 0, 0, 0),  # Vacía (33.33%)
+            (0, 0, 0, 0, 0, 0),  # Vacía (33.33%)
+            (0, 1, 0, 0, 0, 0),  # Fallo (33.33%)
+            (0, 1, 0, 0, 0, 0),  # Fallo (33.33%)
+            (0, 0, 0, 1, 0, 0),  # Amenaza (33.33%)
+            (0, 0, 0, 1, 0, 0),  # Amenaza (33.33%)
         ],
     },
-
     "p": {
         "name": "Dificultad",
         "color": "🟣",
         "faces": [
-            (0, 0, 0, 0, 0, 0),
-            (0, 1, 0, 0, 0, 0),
-            (0, 2, 0, 0, 0, 0),
-            (0, 0, 0, 1, 0, 0),
-            (0, 0, 0, 1, 0, 0),
-            (0, 0, 0, 1, 0, 0),
-            (0, 0, 0, 2, 0, 0),
-            (0, 1, 0, 1, 0, 0),
+            (0, 0, 0, 0, 0, 0),  # Vacía (12.5%)
+            (0, 1, 0, 0, 0, 0),  # Fallo (12.5%)
+            (0, 2, 0, 0, 0, 0),  # Doble Fallo (12.5%)
+            (0, 0, 0, 1, 0, 0),  # Amenaza (37.5%)
+            (0, 0, 0, 1, 0, 0),  # Amenaza (37.5%)
+            (0, 0, 0, 1, 0, 0),  # Amenaza (37.5%)
+            (0, 0, 0, 2, 0, 0),  # Doble Amenaza (12.5%)
+            (0, 1, 0, 1, 0, 0),  # Fallo + Amenaza (12.5%)
         ],
     },
-
     "r": {
         "name": "Desafío",
         "color": "🔴",
         "faces": [
-            (0, 0, 0, 0, 0, 0),
-            (0, 1, 0, 0, 0, 0),
-            (0, 1, 0, 0, 0, 0),
-            (0, 2, 0, 0, 0, 0),
-            (0, 2, 0, 0, 0, 0),
-            (0, 0, 0, 1, 0, 0),
-            (0, 0, 0, 1, 0, 0),
-            (0, 1, 0, 1, 0, 0),
-            (0, 1, 0, 1, 0, 0),
-            (0, 0, 0, 2, 0, 0),
-            (0, 0, 0, 2, 0, 0),
-            (0, 1, 0, 0, 0, 1),
+            (0, 0, 0, 0, 0, 0),  # Vacía (8.33%)
+            (0, 1, 0, 0, 0, 0),  # Fallo (16.67%)
+            (0, 1, 0, 0, 0, 0),  # Fallo (16.67%)
+            (0, 2, 0, 0, 0, 0),  # Doble Fallo (16.67%)
+            (0, 2, 0, 0, 0, 0),  # Doble Fallo (16.67%)
+            (0, 0, 0, 1, 0, 0),  # Amenaza (16.67%)
+            (0, 0, 0, 1, 0, 0),  # Amenaza (16.67%)
+            (0, 1, 0, 1, 0, 0),  # Fallo + Amenaza (16.67%)
+            (0, 1, 0, 1, 0, 0),  # Fallo + Amenaza (16.67%)
+            (0, 0, 0, 2, 0, 0),  # Doble Amenaza (16.67%)
+            (0, 0, 0, 2, 0, 0),  # Doble Amenaza (16.67%)
+            (0, 1, 0, 0, 0, 1),  # Desesperación (8.33%)
         ],
     },
 }
 
-
 # ==================================================
-# SÍMBOLOS
+# SÍMBOLOS (Actualizados con emojis de Discord)
 # ==================================================
 
 SYMBOLS = {
-    "success": "✔",
-    "failure": "✖",
-    "advantage": "✧",
-    "threat": "⚠",
-    "triumph": "🌟",
-    "despair": "💀",
+    "success": ":white_check_mark:",
+    "failure": ":x:",
+    "advantage": ":sparkles:",
+    "threat": ":warning:",
+    "triumph": ":star2:",
+    "despair": ":skull:",
 }
-
 
 # ==================================================
 # LANZAMIENTO DE DADOS
@@ -127,7 +119,6 @@ SYMBOLS = {
 
 def roll_pool(pool):
     """Lanza los dados indicados y calcula sus resultados."""
-
     pool = pool.lower().replace(" ", "")
 
     if not pool:
@@ -170,10 +161,7 @@ def roll_pool(pool):
             "blank": not symbols,
         })
 
-    # Cálculo de resultados netos.
-    # Triunfos cuentan como éxitos.
-    # Desesperaciones cuentan como fallos.
-
+    # Cálculo de resultados netos
     net_success = (
         totals["success"]
         + totals["triumph"]
@@ -192,110 +180,3 @@ def roll_pool(pool):
         "net_success": net_success,
         "net_advantage": net_advantage,
     }
-
-
-# ==================================================
-# FORMATEAR RESULTADO
-# ==================================================
-
-
-def format_result(result):
-    """Presentación compacta de la tirada."""
-
-    output = [
-        "🎲 **DICEDGENESYS**",
-        "|| Tirada completada ||",
-        ""
-    ]
-
-    grouped = {}
-
-    for die in result["dice"]:
-        name = die["name"]
-
-        if name not in grouped:
-            grouped[name] = {
-                "color": die["color"],
-                "results": []
-            }
-
-        if die["blank"]:
-            symbols = "—"
-        else:
-            symbols = " ".join(die["symbols"])
-
-        grouped[name]["results"].append(symbols)
-
-    for name, data in grouped.items():
-        rolls = " / ".join(data["results"])
-
-        output.append(
-            f"{data['color']} **{name} ×{len(data['results'])}**"
-            f" · {rolls}"
-        )
-
-    success = result["net_success"]
-    advantage = result["net_advantage"]
-    totals = result["totals"]
-
-    output.append("")
-    output.append("━━━━━━━━━━━━━━━━")
-    output.append("⚔️ **RESULTADO FINAL**")
-
-    if success > 0:
-        output.append(f"✔ Éxitos: **{success}**")
-    elif success < 0:
-        output.append(f"✖ Fallos: **{abs(success)}**")
-    else:
-        output.append("⚖️ Éxitos cancelados")
-
-    if advantage > 0:
-        output.append(f"✧ Ventajas: **{advantage}**")
-    elif advantage < 0:
-        output.append(f"⚠ Amenazas: **{abs(advantage)}**")
-    else:
-        output.append("⚖️ Ventajas canceladas")
-
-    # Los símbolos especiales siempre se muestran
-    output.append("━━━━━━━━━━━━━━━━")
-
-    if totals["triumph"] > 0:
-        output.append(
-            f"🌟 **TRIUNFOS: {totals['triumph']}**"
-        )
-
-    if totals["despair"] > 0:
-        output.append(
-            f"💀 **DESESPERACIONES: {totals['despair']}**"
-        )
-
-    return "\n".join(output)
-
-
-
-# ==================================================
-# PRUEBA INDEPENDIENTE DE DISCORD
-# ==================================================
-
-if __name__ == "__main__":
-
-    print("\n🎲 SISTEMA DE DADOS GENESYS")
-    print("━━━━━━━━━━━━━━━━━━━━━━━━")
-    print("b = Impulso")
-    print("g = Habilidad")
-    print("y = Pericia")
-    print("k = Contratiempo")
-    print("p = Dificultad")
-    print("r = Desafío")
-    print("━━━━━━━━━━━━━━━━━━━━━━━━")
-
-    pool = input("\nIntroduce los dados: ")
-
-    try:
-        result = roll_pool(pool)
-
-        print()
-        print(format_result(result))
-
-    except ValueError as error:
-        print(f"\n❌ Error: {error}")
