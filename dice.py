@@ -3,11 +3,9 @@ import random
 # ==================================================
 # CONFIGURACIÓN DE LOS DADOS GENESYS
 # ==================================================
-#
 # Cada cara se representa mediante la tupla:
 # (éxitos, fallos, ventajas, amenazas, triunfos, desesperaciones)
 # ==================================================
-
 DICE = {
     "b": {
         "name": "Bonus",
@@ -42,7 +40,6 @@ DICE = {
             (0, 0, 0, 0, 0, 0),  # Vacía (8.33%)
             (1, 0, 0, 0, 0, 0),  # Éxito (16.67%)
             (1, 0, 0, 0, 0, 0),  # Éxito (16.67%)
-            (2, 0, 0, 0, 0, 0),  # Doble Éxito (25%)
             (2, 0, 0, 0, 0, 0),  # Doble Éxito (25%)
             (2, 0, 0, 0, 0, 0),  # Doble Éxito (25%)
             (0, 0, 1, 0, 0, 0),  # Ventaja (8.33%)
@@ -100,10 +97,6 @@ DICE = {
     },
 }
 
-# ==================================================
-# SÍMBOLOS (Actualizados con emojis de Discord)
-# ==================================================
-
 SYMBOLS = {
     "success": ":white_check_mark:",
     "failure": ":x:",
@@ -113,21 +106,14 @@ SYMBOLS = {
     "despair": ":skull:",
 }
 
-# ==================================================
-# LANZAMIENTO DE DADOS
-# ==================================================
-
 def roll_pool(pool):
-    """Lanza los dados indicados y calcula sus resultados."""
     pool = pool.lower().replace(" ", "")
-
     if not pool:
         raise ValueError("Debes indicar al menos un dado.")
-
     for letter in pool:
         if letter not in DICE:
             raise ValueError(f"Dado desconocido: '{letter}'")
-
+    
     totals = {
         "success": 0,
         "failure": 0,
@@ -136,44 +122,35 @@ def roll_pool(pool):
         "triumph": 0,
         "despair": 0,
     }
-
     results = []
-
     for letter in pool:
         die = DICE[letter]
         face = random.choice(die["faces"])
-
         names = list(totals.keys())
-
         for name, amount in zip(names, face):
             totals[name] += amount
-
         symbols = [
             f"{SYMBOLS[name]} ×{amount}"
             for name, amount in zip(names, face)
             if amount > 0
         ]
-
         results.append({
             "name": die["name"],
             "color": die["color"],
             "symbols": symbols,
             "blank": not symbols,
         })
-
-    # Cálculo de resultados netos
+    
     net_success = (
         totals["success"]
         + totals["triumph"]
         - totals["failure"]
         - totals["despair"]
     )
-
     net_advantage = (
         totals["advantage"]
         - totals["threat"]
     )
-
     return {
         "dice": results,
         "totals": totals,

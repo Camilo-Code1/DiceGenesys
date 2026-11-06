@@ -111,21 +111,34 @@ async def roll(ctx, *, pool: str = None):
                 inline=False
             )
 
-        # 2. Resumen neto
+        # 2. Resumen neto (Corrigiendo validaciones de cancelación)
         net_lines = []
+        
+        # Evaluación de Éxitos / Fallos
+        has_success_source = totals["success"] > 0 or totals["triumph"] > 0
+        has_failure_source = totals["failure"] > 0 or totals["despair"] > 0
+
         if net_success > 0:
             net_lines.append(f"{SYMBOLS['success']} Éxitos netos: **{net_success}**")
         elif net_success < 0:
             net_lines.append(f"{SYMBOLS['failure']} Fallos netos: **{abs(net_success)}**")
-        else:
-            net_lines.append("⚖️ Éxitos y fallos totalmente cancelados")
+        elif has_success_source or has_failure_source:
+            net_lines.append("⚖️ Éxitos y fallos cancelados")
+
+        # Evaluación de Ventajas / Amenazas
+        has_advantage_source = totals["advantage"] > 0
+        has_threat_source = totals["threat"] > 0
 
         if net_advantage > 0:
             net_lines.append(f"{SYMBOLS['advantage']} Ventajas netas: **{net_advantage}**")
         elif net_advantage < 0:
             net_lines.append(f"{SYMBOLS['threat']} Amenazas netas: **{abs(net_advantage)}**")
-        else:
-            net_lines.append("⚖️ Ventajas y amenazas totalmente canceladas")
+        elif has_advantage_source or has_threat_source:
+            net_lines.append("⚖️ Ventajas y amenazas canceladas")
+
+        # Si no hubo ningún símbolo de éxito/fallo ni ventaja/amenaza relevante
+        if not net_lines:
+            net_lines.append("🎲 ¡Tirada completamente vacía!")
 
         embed.add_field(
             name="📊 Resultado:",
@@ -147,7 +160,8 @@ async def roll(ctx, *, pool: str = None):
                 inline=False
             )
 
-        embed.set_footer(text=f"Solicitado por {ctx.author.display_name}", icon_url=ctx.author.avatar.url if ctx.author.avatar else None)
+        avatar_url = ctx.author.avatar.url if ctx.author.avatar else ctx.author.default_avatar.url
+        embed.set_footer(text=f"Solicitado por {ctx.author.display_name}", icon_url=avatar_url)
 
         await ctx.send(embed=embed)
 
