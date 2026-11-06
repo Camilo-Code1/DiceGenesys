@@ -100,10 +100,10 @@ DICE = {
 SYMBOLS = {
     "success": ":white_check_mark:",
     "failure": ":x:",
-    "advantage": ":sparkles:",
+    "advantage": ":arrow_up:",
     "threat": ":warning:",
-    "triumph": ":star2:",
-    "despair": ":skull:",
+    "triumph": ":trident:",
+    "despair": ":fleur_de_lis:",
 }
 
 def roll_pool(pool):

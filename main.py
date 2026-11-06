@@ -80,6 +80,8 @@ async def roll(ctx, *, pool: str = None):
         else:
             embed_color = discord.Color.gold()
 
+        # El título principal del Embed ya es más grande por defecto en Discord,
+        # pero le añadimos formato para resaltarlo aún más.
         embed = discord.Embed(
             title="⚔️ Resultado de la Tirada",
             color=embed_color
@@ -111,7 +113,7 @@ async def roll(ctx, *, pool: str = None):
                 inline=False
             )
 
-        # 2. Resumen neto (Corrigiendo validaciones de cancelación)
+        # 2. Resumen neto
         net_lines = []
         
         # Evaluación de Éxitos / Fallos
@@ -119,9 +121,9 @@ async def roll(ctx, *, pool: str = None):
         has_failure_source = totals["failure"] > 0 or totals["despair"] > 0
 
         if net_success > 0:
-            net_lines.append(f"{SYMBOLS['success']} Éxitos netos: **{net_success}**")
+            net_lines.append(f"{SYMBOLS['success']} Éxitos: **{net_success}**")
         elif net_success < 0:
-            net_lines.append(f"{SYMBOLS['failure']} Fallos netos: **{abs(net_success)}**")
+            net_lines.append(f"{SYMBOLS['failure']} Fallos: **{abs(net_success)}**")
         elif has_success_source or has_failure_source:
             net_lines.append("⚖️ Éxitos y fallos cancelados")
 
@@ -130,21 +132,23 @@ async def roll(ctx, *, pool: str = None):
         has_threat_source = totals["threat"] > 0
 
         if net_advantage > 0:
-            net_lines.append(f"{SYMBOLS['advantage']} Ventajas netas: **{net_advantage}**")
+            net_lines.append(f"{SYMBOLS['advantage']} Ventajas: **{net_advantage}**")
         elif net_advantage < 0:
-            net_lines.append(f"{SYMBOLS['threat']} Amenazas netas: **{abs(net_advantage)}**")
+            net_lines.append(f"{SYMBOLS['threat']} Amenazas: **{abs(net_advantage)}**")
         elif has_advantage_source or has_threat_source:
             net_lines.append("⚖️ Ventajas y amenazas canceladas")
 
-        # Si no hubo ningún símbolo de éxito/fallo ni ventaja/amenaza relevante
+        # Si no hubo ningún símbolo relevante
         if not net_lines:
             net_lines.append("🎲 ¡Tirada completamente vacía!")
 
         embed.add_field(
-            name="📊 Resultado:",
-            value="\n".join(net_lines),
-            inline=False
-        )
+        name="**RESULTADO**",
+        value="\n".join(net_lines),
+        inline=False
+)
+
+
 
         # 3. Símbolos especiales (Triunfos / Desesperaciones) si los hay
         special_lines = []
@@ -155,7 +159,7 @@ async def roll(ctx, *, pool: str = None):
 
         if special_lines:
             embed.add_field(
-                name="✨ Efectos Especiales:",
+                name="",
                 value="\n".join(special_lines),
                 inline=False
             )
