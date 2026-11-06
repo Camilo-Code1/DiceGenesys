@@ -67,56 +67,55 @@ async def roll(ctx, *, pool: str = None):
     try:
         result = roll_pool(pool)
 
-        # Construcción del Embed de resultados
         net_success = result["net_success"]
         net_advantage = result["net_advantage"]
         totals = result["totals"]
 
-        # Determinar color del Embed según el resultado neto de éxitos
-        if net_success > 0:
+        # Determinar color de la barra lateral del Embed según prioridad temática:
+        # 1. Desesperación (Morado)
+        # 2. Triunfo (Amarillo / Dorado)
+        # 3. Éxito neto (Verde)
+        # 4. Fallo neto (Rojo)
+        # 5. Solo Ventajas (Azul)
+        # 6. Solo Amenazas (Naranja)
+        # 7. Marrón o por defecto para otros casos neutros
+        
+        brown_color = discord.Color.from_rgb(139, 69, 19) # Tono marrón madera/desventaja
+
+        if totals["despair"] > 0:
+            embed_color = discord.Color.purple()
+        elif totals["triumph"] > 0:
+            embed_color = discord.Color.gold()
+        elif net_success > 0:
             embed_color = discord.Color.green()
         elif net_success < 0:
             embed_color = discord.Color.red()
+        elif net_success == 0 and net_advantage > 0:
+            embed_color = discord.Color.blue()
+        elif net_success == 0 and net_advantage < 0:
+            embed_color = discord.Color.orange()
         else:
-            embed_color = discord.Color.gold()
+            embed_color = brown_color
 
-        # El título principal del Embed ya es más grande por defecto en Discord,
-        # pero le añadimos formato para resaltarlo aún más.
         embed = discord.Embed(
-            title="⚔️ Resultado de la Tirada",
+            title="Tirada",
             color=embed_color
         )
 
-        # 1. Agrupar tiradas individuales por tipo de dado
-        grouped = {}
+        # 1. Agrupar tiradas individuales para mostrarlas de forma compacta
+        grouped_counts = {}
         for die in result["dice"]:
-            name = die["name"]
-            if name not in grouped:
-                grouped[name] = {
-                    "color": die["color"],
-                    "results": []
-                }
-            
-            if die["blank"]:
-                symbols_str = "— (Vacío)"
-            else:
-                symbols_str = " ".join(die["symbols"])
-            
-            grouped[name]["results"].append(symbols_str)
+            key = (die["color"], die["name"])
+            grouped_counts[key] = grouped_counts.get(key, 0) + 1
 
-        # Añadir detalle de dados lanzados
-        for name, data in grouped.items():
-            rolls_text = "\n".join([f"• {res}" for res in data["results"]])
-            embed.add_field(
-                name=f"{data['color']} {name} (×{len(data['results'])})",
-                value=rolls_text,
-                inline=False
-            )
+        dice_summary_lines = []
+        for (color, name), count in grouped_counts.items():
+            dice_summary_lines.append(f"{color} {name} (×{count})")
 
-        # 2. Resumen neto
+        # 2. Recopilar totales netos y especiales en una sola lista
         net_lines = []
         
-        # Evaluación de Éxitos / Fallos
+        # Éxitos / Fallos / Triunfos netos
         has_success_source = totals["success"] > 0 or totals["triumph"] > 0
         has_failure_source = totals["failure"] > 0 or totals["despair"] > 0
 
@@ -127,7 +126,7 @@ async def roll(ctx, *, pool: str = None):
         elif has_success_source or has_failure_source:
             net_lines.append("⚖️ Éxitos y fallos cancelados")
 
-        # Evaluación de Ventajas / Amenazas
+        # Ventajas / Amenazas netas
         has_advantage_source = totals["advantage"] > 0
         has_threat_source = totals["threat"] > 0
 
@@ -138,31 +137,24 @@ async def roll(ctx, *, pool: str = None):
         elif has_advantage_source or has_threat_source:
             net_lines.append("⚖️ Ventajas y amenazas canceladas")
 
+        # Triunfos y Desesperaciones absolutas
+        if totals["triumph"] > 0:
+            net_lines.append(f"{SYMBOLS['triumph']} Triunfos: **{totals['triumph']}**")
+        if totals["despair"] > 0:
+            net_lines.append(f"{SYMBOLS['despair']} Desesperaciones: **{totals['despair']}**")
+
         # Si no hubo ningún símbolo relevante
         if not net_lines:
             net_lines.append("🎲 ¡Tirada completamente vacía!")
 
-        embed.add_field(
-        name="**RESULTADO**",
-        value="\n".join(net_lines),
-        inline=False
-)
+        # 3. Construir la descripción uniendo los dados tirados y el resultado final
+        full_description = (
+            "\n".join(dice_summary_lines)
+            + "\n### Resultado\n"
+            + "\n".join(net_lines)
+        )
 
-
-
-        # 3. Símbolos especiales (Triunfos / Desesperaciones) si los hay
-        special_lines = []
-        if totals["triumph"] > 0:
-            special_lines.append(f"{SYMBOLS['triumph']} **TRIUNFOS: {totals['triumph']}**")
-        if totals["despair"] > 0:
-            special_lines.append(f"{SYMBOLS['despair']} **DESESPERACIONES: {totals['despair']}**")
-
-        if special_lines:
-            embed.add_field(
-                name="",
-                value="\n".join(special_lines),
-                inline=False
-            )
+        embed.description = full_description
 
         avatar_url = ctx.author.avatar.url if ctx.author.avatar else ctx.author.default_avatar.url
         embed.set_footer(text=f"Solicitado por {ctx.author.display_name}", icon_url=avatar_url)
